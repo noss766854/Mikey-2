@@ -35,6 +35,7 @@ export function isStreamQuestion(content) {
     /\bwhat time (?:is|does)? ?(?:the )?(?:stream|capy stream|capy go live|capy going live)\b/,
     /\b(?:next|schedule|start|starting) (?:stream|livestream)\b/,
     /\b(?:stream|livestream) (?:schedule|start|starts|starting)\b/,
+    /^(?:capy(?:s)? )?(?:the )?(?:stream|livestream) (?:when|time)$/,
     /\bcapy(?:s)? (?:next )?(?:stream|livestream) (?:schedule|start|starts|starting|when)\b/
   ];
 
