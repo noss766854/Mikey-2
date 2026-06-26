@@ -1,18 +1,21 @@
 {
   "name": "mikey-2-discord-bot",
   "version": "1.0.0",
-  "description": "Mikey 2.0, a Vercel-friendly Discord slash command bot for stream questions and casual replies.",
+  "description": "Mikey 2.0, a Discord bot for stream questions, with Vercel slash-command and Docker Gateway modes.",
   "type": "module",
   "private": true,
+  "packageManager": "pnpm@11.7.0",
   "scripts": {
     "invite": "node src/invite.js",
     "register": "node src/register-commands.js",
+    "start": "node src/gateway-bot.js",
     "test": "node --test"
   },
   "engines": {
     "node": ">=20"
   },
   "dependencies": {
+    "discord.js": "^14.26.4",
     "dotenv": "^17.4.2",
     "tweetnacl": "^1.0.3"
   }

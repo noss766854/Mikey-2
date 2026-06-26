@@ -1,6 +1,9 @@
 # Mikey 2.0 Discord Bot
 
-Mikey 2.0 is a Vercel-friendly Discord slash command bot. It does not need an always-on server.
+Mikey 2.0 can run in two modes:
+
+- Docker/Gateway mode for normal chat messages like `when stream`.
+- Vercel slash-command mode for `/stream` and `/mikey`.
 
 Commands:
 
@@ -11,7 +14,7 @@ Commands:
 
 - Node.js 20 or newer
 - A Discord application with a bot token
-- A free Vercel account
+- A Docker/always-on host for normal chat replies, or a free Vercel account for slash commands
 
 ## Discord Setup
 
@@ -20,7 +23,8 @@ Commands:
    - Application ID
    - Public Key
 3. Go to **Bot**, create a bot, and copy the bot token.
-4. Copy `.env.example` to `.env` and fill in:
+4. For normal chat replies, go to **Bot** and enable **Message Content Intent**.
+5. Copy `.env.example` to `.env` and fill in:
 
    ```env
    DISCORD_TOKEN=your-real-bot-token
@@ -34,6 +38,24 @@ Commands:
 ```bash
 npm install
 ```
+
+## Run As A Normal Chat Bot
+
+Use this mode on Docker/always-on hosts. Mikey will answer phrases like `when stream` without a slash command.
+
+Required environment variable:
+
+```env
+DISCORD_TOKEN=your-real-bot-token
+```
+
+Start locally:
+
+```bash
+npm start
+```
+
+Docker hosts can build the included `Dockerfile`. The container starts `npm start` through pnpm and runs the Gateway bot.
 
 ## Register Commands
 
