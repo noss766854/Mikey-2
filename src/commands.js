@@ -4,8 +4,12 @@ export const ApplicationCommandOptionType = Object.freeze({
 
 export const COMMAND_NAMES = Object.freeze({
   STREAM: "stream",
-  MIKEY: "mikey"
+  MIKEY: "mikey",
+  STOP_BARK: "stopbark",
+  START_BARK: "startbark"
 });
+
+const ADMINISTRATOR_PERMISSION = "8";
 
 export const MIKEY_COMMANDS = [
   {
@@ -23,5 +27,17 @@ export const MIKEY_COMMANDS = [
         required: false
       }
     ]
+  },
+  {
+    name: COMMAND_NAMES.STOP_BARK,
+    description: "Stop Mikey's scheduled barking.",
+    default_member_permissions: ADMINISTRATOR_PERMISSION,
+    dm_permission: false
+  },
+  {
+    name: COMMAND_NAMES.START_BARK,
+    description: "Start Mikey's scheduled barking.",
+    default_member_permissions: ADMINISTRATOR_PERMISSION,
+    dm_permission: false
   }
 ];

@@ -63,4 +63,14 @@ describe("interaction handling", () => {
 
     assert.equal(response.data.content, "Hey Dragos, Mikey 2.0 is online.");
   });
+
+  it("does not pretend an HTTP bark command changed the Gateway timer", () => {
+    const response = handleInteraction(commandInteraction("stopbark"));
+
+    assert.equal(
+      response.data.content,
+      "Bark controls must be handled by Mikey's always-running Gateway bot."
+    );
+    assert.equal(response.data.flags, 64);
+  });
 });

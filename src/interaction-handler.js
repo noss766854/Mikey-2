@@ -102,6 +102,16 @@ export function handleInteraction(interaction) {
     return mikeyReply(interaction);
   }
 
+  if (
+    interaction.data?.name === COMMAND_NAMES.STOP_BARK ||
+    interaction.data?.name === COMMAND_NAMES.START_BARK
+  ) {
+    return commandReply(
+      "Bark controls must be handled by Mikey's always-running Gateway bot.",
+      { ephemeral: true }
+    );
+  }
+
   return commandReply("Unknown command.", {
     ephemeral: true
   });

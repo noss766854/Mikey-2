@@ -2,8 +2,6 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
   BARK_RESPONSE,
-  isStartBarkCommand,
-  isStopBarkCommand,
   isStreamQuestion,
   makeCasualReply,
   makeStreamReply,
@@ -62,18 +60,6 @@ describe("stream question detection", () => {
 });
 
 describe("replies", () => {
-  it("recognizes only the stop-bark command", () => {
-    assert.equal(isStopBarkCommand("!stopbark"), true);
-    assert.equal(isStopBarkCommand("  !STOPBARK  "), true);
-    assert.equal(isStopBarkCommand("please !stopbark"), false);
-  });
-
-  it("recognizes only the start-bark command", () => {
-    assert.equal(isStartBarkCommand("!startbark"), true);
-    assert.equal(isStartBarkCommand("  !STARTBARK  "), true);
-    assert.equal(isStartBarkCommand("please !startbark"), false);
-  });
-
   it("replies to lurk", () => {
     assert.equal(makeCasualReply("lurk", "Dragos"), "good boy");
   });

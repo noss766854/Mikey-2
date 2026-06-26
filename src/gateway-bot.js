@@ -7,10 +7,9 @@ import {
   Partials,
   PermissionFlagsBits
 } from "discord.js";
+import { COMMAND_NAMES } from "./commands.js";
 import {
   BARK_RESPONSE,
-  isStartBarkCommand,
-  isStopBarkCommand,
   isStreamQuestion,
   makeCasualReply,
   makeStreamReply,
@@ -88,57 +87,6 @@ client.on(Events.MessageCreate, async (message) => {
     return;
   }
 
-  if (isStopBarkCommand(message.content)) {
-    const isAdmin =
-      message.inGuild() &&
-      message.member?.permissions.has(PermissionFlagsBits.Administrator);
-
-    if (!isAdmin) {
-      await message.reply({
-        content: "Only an administrator can stop the barking.",
-        allowedMentions: { repliedUser: false }
-      });
-      return;
-    }
-
-    if (barkInterval) {
-      clearInterval(barkInterval);
-      barkInterval = null;
-      await message.reply({
-        content: "Stopped barking.",
-        allowedMentions: { repliedUser: false }
-      });
-      return;
-    }
-
-    await message.reply({
-      content: "Barking is already disabled.",
-      allowedMentions: { repliedUser: false }
-    });
-    return;
-  }
-
-  if (isStartBarkCommand(message.content)) {
-    const isAdmin =
-      message.inGuild() &&
-      message.member?.permissions.has(PermissionFlagsBits.Administrator);
-
-    if (!isAdmin) {
-      await message.reply({
-        content: "Only an administrator can start the barking.",
-        allowedMentions: { repliedUser: false }
-      });
-      return;
-    }
-
-    const started = startScheduledBarking(client);
-    await message.reply({
-      content: started ? "Started barking." : "Barking is already enabled.",
-      allowedMentions: { repliedUser: false }
-    });
-    return;
-  }
-
   if (isStreamQuestion(message.content)) {
     rememberReplyChannel(message);
     await message.channel.send({
@@ -164,6 +112,76 @@ client.on(Events.MessageCreate, async (message) => {
       }
     });
   }
+});
+
+client.on(Events.InteractionCreate, async (interaction) => {
+  if (!interaction.isChatInputCommand()) {
+    return;
+  }
+
+  if (interaction.commandName === COMMAND_NAMES.STREAM) {
+    await interaction.reply({
+      content: makeStreamReply(interaction.user.id),
+      allowedMentions: { users: [interaction.user.id] }
+    });
+    return;
+  }
+
+  if (interaction.commandName === COMMAND_NAMES.MIKEY) {
+    const message = interaction.options.getString("message") ?? "help";
+
+    if (isStreamQuestion(message)) {
+      await interaction.reply({
+        content: makeStreamReply(interaction.user.id),
+        allowedMentions: { users: [interaction.user.id] }
+      });
+      return;
+    }
+
+    const displayName =
+      interaction.member?.displayName ??
+      interaction.user.globalName ??
+      interaction.user.username;
+    await interaction.reply(makeCasualReply(message, displayName));
+    return;
+  }
+
+  const isBarkCommand =
+    interaction.commandName === COMMAND_NAMES.STOP_BARK ||
+    interaction.commandName === COMMAND_NAMES.START_BARK;
+
+  if (!isBarkCommand) {
+    return;
+  }
+
+  const isAdmin =
+    interaction.inGuild() &&
+    interaction.memberPermissions?.has(PermissionFlagsBits.Administrator);
+
+  if (!isAdmin) {
+    await interaction.reply({
+      content: "Only an administrator can control the barking.",
+      ephemeral: true
+    });
+    return;
+  }
+
+  if (interaction.commandName === COMMAND_NAMES.STOP_BARK) {
+    if (!barkInterval) {
+      await interaction.reply("Barking is already disabled.");
+      return;
+    }
+
+    clearInterval(barkInterval);
+    barkInterval = null;
+    await interaction.reply("Stopped barking.");
+    return;
+  }
+
+  const started = startScheduledBarking(client);
+  await interaction.reply(
+    started ? "Started barking." : "Barking is already enabled."
+  );
 });
 
 client.on(Events.Error, (error) => {

@@ -2,19 +2,21 @@
 
 Mikey 2.0 can run in two modes:
 
-- Docker/Gateway mode for normal chat messages like `when stream`.
-- Vercel slash-command mode for `/stream` and `/mikey`.
+- Docker/Gateway mode for normal chat messages and all slash commands.
+- Vercel mode for the stateless `/stream` and `/mikey` slash commands only.
 
 Commands:
 
 - `/stream` replies with Capy's usual stream time and info link.
 - `/mikey message:...` lets people talk to Mikey. If the message is a variation of "when is the stream?", Mikey sends the stream reply.
+- `/stopbark` stops scheduled barking. Administrator only.
+- `/startbark` restarts scheduled barking. Administrator only.
 
 ## Requirements
 
 - Node.js 20 or newer
 - A Discord application with a bot token
-- A Docker/always-on host for normal chat replies, or a free Vercel account for slash commands
+- A Docker/always-on host for normal chat replies and bark controls, or a free Vercel account for stateless slash commands
 
 ## Discord Setup
 
@@ -59,6 +61,8 @@ npm start
 Docker hosts can build the included `Dockerfile`. The container starts `npm start` through pnpm and runs the Gateway bot.
 
 Mikey says `bark` every 30 minutes in the configured channel. The default `BARK_CHANNEL_ID` is `1375559893133561886`.
+
+For slash commands to reach the Gateway bot, leave the Discord application's **Interactions Endpoint URL** blank. Discord sends interactions to the Gateway when no outgoing interaction webhook is configured.
 
 ## Register Commands
 
