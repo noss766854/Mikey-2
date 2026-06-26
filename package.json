@@ -1,0 +1,19 @@
+{
+  "name": "mikey-2-discord-bot",
+  "version": "1.0.0",
+  "description": "Mikey 2.0, a Vercel-friendly Discord slash command bot for stream questions and casual replies.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "invite": "node src/invite.js",
+    "register": "node src/register-commands.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "tweetnacl": "^1.0.3"
+  }
+}
