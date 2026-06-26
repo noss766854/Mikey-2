@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  BARK_RESPONSE,
   isStreamQuestion,
   makeCasualReply,
   makeStreamReply,
@@ -60,6 +61,18 @@ describe("stream question detection", () => {
 describe("replies", () => {
   it("mentions the asker in the stream reply", () => {
     assert.equal(makeStreamReply("42"), `<@42> ${STREAM_RESPONSE}`);
+  });
+
+  it("thanks Mikey politely", () => {
+    assert.equal(makeCasualReply("thanks mikey", "Dragos"), "You're welcome.");
+  });
+
+  it("apologizes when told to be quiet", () => {
+    assert.equal(makeCasualReply("shut up mikey", "Dragos"), "Sorry.");
+  });
+
+  it("has an hourly bark response", () => {
+    assert.equal(BARK_RESPONSE, "bark");
   });
 
   it("makes a casual reply", () => {

@@ -2,6 +2,7 @@ export const STREAM_INFO_URL =
   "https://discord.com/channels/1330595460112449556/1331588384954515567";
 
 export const STREAM_RESPONSE = `Capy usually streams every day for atleast an hour, usually after 8PM UTC+2 (Romanian time) but check out ${STREAM_INFO_URL} for more information.`;
+export const BARK_RESPONSE = "bark";
 
 const GENERIC_STREAM_CONTEXT =
   /\b(a stream|my stream|your stream|their stream|some stream|something like a stream|stream in my|stream in the|stream at my|stream at the)\b/i;
@@ -223,6 +224,10 @@ export function makeCasualReply(content, displayName = "there") {
   const text = normalizeMessage(content);
   const name = displayName.trim() || "there";
 
+  if (/\b(shut up|stfu|be quiet)\b/.test(text)) {
+    return "Sorry.";
+  }
+
   if (/\b(hi|hello|hey|yo|sup)\b/.test(text)) {
     return `Hey ${name}, Mikey 2.0 is online.`;
   }
@@ -232,7 +237,7 @@ export function makeCasualReply(content, displayName = "there") {
   }
 
   if (/\b(thanks|thank you|ty)\b/.test(text)) {
-    return `Anytime, ${name}.`;
+    return "You're welcome.";
   }
 
   if (/\b(help|commands?)\b/.test(text)) {

@@ -7,6 +7,7 @@ import {
   Partials
 } from "discord.js";
 import {
+  BARK_RESPONSE,
   isStreamQuestion,
   makeCasualReply,
   makeStreamReply,
@@ -14,6 +15,9 @@ import {
 } from "./responses.js";
 
 const token = process.env.DISCORD_TOKEN;
+const barkChannelId = process.env.BARK_CHANNEL_ID;
+const HOUR_MS = 60 * 60 * 1000;
+let lastReplyChannelId = null;
 
 if (!token) {
   console.error("Missing DISCORD_TOKEN. Set it in your host's environment variables.");
@@ -35,7 +39,35 @@ client.once(Events.ClientReady, (readyClient) => {
   readyClient.user.setActivity("for stream questions", {
     type: ActivityType.Listening
   });
+
+  setInterval(() => {
+    sendHourlyBark(readyClient);
+  }, HOUR_MS);
 });
+
+function rememberReplyChannel(message) {
+  if (message.guild && typeof message.channel?.send === "function") {
+    lastReplyChannelId = message.channel.id;
+  }
+}
+
+async function sendHourlyBark(readyClient) {
+  const channelId = barkChannelId || lastReplyChannelId;
+
+  if (!channelId) {
+    return;
+  }
+
+  try {
+    const channel = await readyClient.channels.fetch(channelId);
+
+    if (typeof channel?.send === "function") {
+      await channel.send(BARK_RESPONSE);
+    }
+  } catch (error) {
+    console.error("Failed to send hourly bark:", error);
+  }
+}
 
 client.on(Events.MessageCreate, async (message) => {
   if (message.author.bot) {
@@ -43,6 +75,7 @@ client.on(Events.MessageCreate, async (message) => {
   }
 
   if (isStreamQuestion(message.content)) {
+    rememberReplyChannel(message);
     await message.channel.send({
       content: makeStreamReply(message.author.id),
       allowedMentions: {
@@ -53,6 +86,7 @@ client.on(Events.MessageCreate, async (message) => {
   }
 
   if (shouldCasuallyReply(message, client.user?.id)) {
+    rememberReplyChannel(message);
     const displayName =
       message.member?.displayName ??
       message.author.globalName ??
