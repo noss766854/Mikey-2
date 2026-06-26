@@ -4,8 +4,8 @@ export const STREAM_INFO_URL =
 export const STREAM_RESPONSE = `Capy usually streams every day for atleast an hour, usually after 8PM UTC+2 (Romanian time) but check out ${STREAM_INFO_URL} for more information.`;
 
 const STREAM_WORDS = /\b(stream|streams|streaming|livestream|live)\b/i;
-const WHEN_WORDS =
-  /\b(when|whens|what time|wat time|time|schedule|scheduled|next|start|starts|starting)\b/i;
+const GENERIC_STREAM_CONTEXT =
+  /\b(a stream|my stream|your stream|their stream|some stream|something like a stream|stream in my|stream in the|stream at my|stream at the)\b/i;
 
 export function normalizeMessage(content) {
   return content
@@ -25,11 +25,24 @@ export function isStreamQuestion(content) {
     return false;
   }
 
-  if (WHEN_WORDS.test(normalized)) {
+  if (GENERIC_STREAM_CONTEXT.test(normalized)) {
+    return false;
+  }
+
+  const schedulePatterns = [
+    /\bwhen(?: is|s| does)? (?:the )?stream(?: start| starts| starting)?\b/,
+    /\bwhen (?:does |is )?capy (?:stream|go live|going live|live)\b/,
+    /\bwhat time (?:is|does)? ?(?:the )?(?:stream|capy stream|capy go live|capy going live)\b/,
+    /\b(?:next|schedule|start|starting) (?:stream|livestream)\b/,
+    /\b(?:stream|livestream) (?:schedule|start|starts|starting)\b/,
+    /\bcapy(?:s)? (?:next )?(?:stream|livestream) (?:schedule|start|starts|starting|when)\b/
+  ];
+
+  if (schedulePatterns.some((pattern) => pattern.test(normalized))) {
     return true;
   }
 
-  return /^stream(?:ing)?$/.test(normalized) && /[?]/.test(content);
+  return /^(?:when )?stream(?:ing)?$/.test(normalized) && /[?]/.test(content);
 }
 
 export function makeStreamReply(userId) {

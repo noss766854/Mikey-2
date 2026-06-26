@@ -27,7 +27,10 @@ describe("stream question detection", () => {
   }
 
   const misses = [
+    "imagine if i had something like a stream in my house, when would it stop?",
     "I watched the stream yesterday",
+    "when would a stream in my garden stop",
+    "what time does my stream stop",
     "Mikey hello",
     "Capy is live",
     "stream clips are funny"
