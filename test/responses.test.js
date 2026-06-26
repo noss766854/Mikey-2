@@ -88,6 +88,10 @@ describe("replies", () => {
     assert.equal(makeCasualReply("thanks mikey", "Dragos"), "You're welcome.");
   });
 
+  it("forgives sorry Mikey", () => {
+    assert.equal(makeCasualReply("sorry mikey", "Dragos"), "all good love you");
+  });
+
   it("apologizes when told to be quiet", () => {
     assert.equal(makeCasualReply("shut up mikey", "Dragos"), "Sorry.");
   });

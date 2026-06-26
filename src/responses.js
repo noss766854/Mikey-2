@@ -237,6 +237,10 @@ export function makeCasualReply(content, displayName = "there") {
     return "good boy";
   }
 
+  if (/\b(sorry|sry|my bad)\b/.test(text)) {
+    return "all good love you";
+  }
+
   if (/\b(hi|hello|hey|yo|sup)\b/.test(text)) {
     return `Hey ${name}, Mikey 2.0 is online.`;
   }
