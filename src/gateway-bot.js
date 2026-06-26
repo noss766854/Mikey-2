@@ -9,6 +9,7 @@ import {
 } from "discord.js";
 import {
   BARK_RESPONSE,
+  isStartBarkCommand,
   isStopBarkCommand,
   isStreamQuestion,
   makeCasualReply,
@@ -44,9 +45,7 @@ client.once(Events.ClientReady, (readyClient) => {
     type: ActivityType.Listening
   });
 
-  barkInterval = setInterval(() => {
-    sendScheduledBark(readyClient);
-  }, BARK_INTERVAL_MS);
+  startScheduledBarking(readyClient);
 });
 
 function rememberReplyChannel(message) {
@@ -71,6 +70,17 @@ async function sendScheduledBark(readyClient) {
   } catch (error) {
     console.error("Failed to send scheduled bark:", error);
   }
+}
+
+function startScheduledBarking(readyClient) {
+  if (barkInterval) {
+    return false;
+  }
+
+  barkInterval = setInterval(() => {
+    sendScheduledBark(readyClient);
+  }, BARK_INTERVAL_MS);
+  return true;
 }
 
 client.on(Events.MessageCreate, async (message) => {
@@ -103,6 +113,27 @@ client.on(Events.MessageCreate, async (message) => {
 
     await message.reply({
       content: "Barking is already disabled.",
+      allowedMentions: { repliedUser: false }
+    });
+    return;
+  }
+
+  if (isStartBarkCommand(message.content)) {
+    const isAdmin =
+      message.inGuild() &&
+      message.member?.permissions.has(PermissionFlagsBits.Administrator);
+
+    if (!isAdmin) {
+      await message.reply({
+        content: "Only an administrator can start the barking.",
+        allowedMentions: { repliedUser: false }
+      });
+      return;
+    }
+
+    const started = startScheduledBarking(client);
+    await message.reply({
+      content: started ? "Started barking." : "Barking is already enabled.",
       allowedMentions: { repliedUser: false }
     });
     return;
