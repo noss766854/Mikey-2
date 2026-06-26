@@ -16,6 +16,13 @@ describe("stream question detection", () => {
     "stream when?",
     "stream time",
     "capy stream when",
+    "wen streem",
+    "strem when",
+    "stram time",
+    "stram whne",
+    "next strem",
+    "what tiem is the streem",
+    "when does capi stram",
     "WHEN STREAM???",
     "what time is the stream",
     "when does Capy stream",
@@ -32,9 +39,12 @@ describe("stream question detection", () => {
 
   const misses = [
     "imagine if i had something like a stream in my house, when would it stop?",
+    "imagine if i had something like a streem in my house, when would it stop?",
     "I watched the stream yesterday",
     "when would a stream in my garden stop",
     "what time does my stream stop",
+    "what time does my strem stop",
+    "when is the steam sale",
     "Mikey hello",
     "Capy is live",
     "stream clips are funny"
