@@ -217,7 +217,12 @@ export function shouldCasuallyReply(message, botUserId) {
   const botWasMentioned = message.mentions?.users?.has(botUserId) ?? false;
   const isDm = message.channel?.isDMBased?.() ?? false;
 
-  return isDm || botWasMentioned || /\bmikey(?:\s*2(?:\s*0)?)?\b/i.test(text);
+  return (
+    isDm ||
+    botWasMentioned ||
+    /\bmikey(?:\s*2(?:\s*0)?)?\b/i.test(text) ||
+    /\blurk\b/i.test(text)
+  );
 }
 
 export function makeCasualReply(content, displayName = "there") {
@@ -226,6 +231,10 @@ export function makeCasualReply(content, displayName = "there") {
 
   if (/\b(shut up|stfu|be quiet)\b/.test(text)) {
     return "Sorry.";
+  }
+
+  if (/\blurk\b/.test(text)) {
+    return "good boy";
   }
 
   if (/\b(hi|hello|hey|yo|sup)\b/.test(text)) {

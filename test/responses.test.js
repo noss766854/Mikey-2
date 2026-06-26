@@ -5,6 +5,7 @@ import {
   isStreamQuestion,
   makeCasualReply,
   makeStreamReply,
+  shouldCasuallyReply,
   STREAM_RESPONSE
 } from "../src/responses.js";
 
@@ -59,6 +60,26 @@ describe("stream question detection", () => {
 });
 
 describe("replies", () => {
+  it("replies to lurk", () => {
+    assert.equal(makeCasualReply("lurk", "Dragos"), "good boy");
+  });
+
+  it("treats lurk as a casual trigger", () => {
+    const message = {
+      content: "lurk",
+      mentions: {
+        users: {
+          has: () => false
+        }
+      },
+      channel: {
+        isDMBased: () => false
+      }
+    };
+
+    assert.equal(shouldCasuallyReply(message, "bot-id"), true);
+  });
+
   it("mentions the asker in the stream reply", () => {
     assert.equal(makeStreamReply("42"), `<@42> ${STREAM_RESPONSE}`);
   });
