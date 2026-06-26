@@ -95,7 +95,7 @@ client.on(Events.MessageCreate, async (message) => {
       clearInterval(barkInterval);
       barkInterval = null;
       await message.reply({
-        content: "Barking disabled.",
+        content: "Stopped barking.",
         allowedMentions: { repliedUser: false }
       });
       return;
