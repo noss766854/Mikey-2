@@ -92,8 +92,8 @@ describe("replies", () => {
     assert.equal(makeCasualReply("sorry mikey", "Dragos"), "all good love you");
   });
 
-  it("apologizes when told to be quiet", () => {
-    assert.equal(makeCasualReply("shut up mikey", "Dragos"), "Sorry.");
+  it("does not apologize when told to be quiet", () => {
+    assert.notEqual(makeCasualReply("shut up mikey", "Dragos"), "Sorry.");
   });
 
   it("has an hourly bark response", () => {

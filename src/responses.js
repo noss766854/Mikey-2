@@ -229,10 +229,6 @@ export function makeCasualReply(content, displayName = "there") {
   const text = normalizeMessage(content);
   const name = displayName.trim() || "there";
 
-  if (/\b(shut up|stfu|be quiet)\b/.test(text)) {
-    return "Sorry.";
-  }
-
   if (/\blurk\b/.test(text)) {
     return "good boy";
   }

@@ -47,7 +47,7 @@ Required environment variable:
 
 ```env
 DISCORD_TOKEN=your-real-bot-token
-BARK_CHANNEL_ID=optional-channel-id-for-hourly-barks
+BARK_CHANNEL_ID=1375559893133561886
 ```
 
 Start locally:
@@ -58,7 +58,7 @@ npm start
 
 Docker hosts can build the included `Dockerfile`. The container starts `npm start` through pnpm and runs the Gateway bot.
 
-Mikey says `bark` once per hour. Set `BARK_CHANNEL_ID` to choose the channel. If it is blank, Mikey barks in the last server channel where he replied after the current restart.
+Mikey says `bark` every 30 minutes in the configured channel. The default `BARK_CHANNEL_ID` is `1375559893133561886`.
 
 ## Register Commands
 

@@ -15,8 +15,9 @@ import {
 } from "./responses.js";
 
 const token = process.env.DISCORD_TOKEN;
-const barkChannelId = process.env.BARK_CHANNEL_ID;
-const HOUR_MS = 60 * 60 * 1000;
+const defaultBarkChannelId = "1375559893133561886";
+const barkChannelId = process.env.BARK_CHANNEL_ID || defaultBarkChannelId;
+const BARK_INTERVAL_MS = 30 * 60 * 1000;
 let lastReplyChannelId = null;
 
 if (!token) {
@@ -41,8 +42,8 @@ client.once(Events.ClientReady, (readyClient) => {
   });
 
   setInterval(() => {
-    sendHourlyBark(readyClient);
-  }, HOUR_MS);
+    sendScheduledBark(readyClient);
+  }, BARK_INTERVAL_MS);
 });
 
 function rememberReplyChannel(message) {
@@ -51,7 +52,7 @@ function rememberReplyChannel(message) {
   }
 }
 
-async function sendHourlyBark(readyClient) {
+async function sendScheduledBark(readyClient) {
   const channelId = barkChannelId || lastReplyChannelId;
 
   if (!channelId) {
@@ -65,7 +66,7 @@ async function sendHourlyBark(readyClient) {
       await channel.send(BARK_RESPONSE);
     }
   } catch (error) {
-    console.error("Failed to send hourly bark:", error);
+    console.error("Failed to send scheduled bark:", error);
   }
 }
 
