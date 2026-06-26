@@ -4,10 +4,12 @@ import {
   Client,
   Events,
   GatewayIntentBits,
-  Partials
+  Partials,
+  PermissionFlagsBits
 } from "discord.js";
 import {
   BARK_RESPONSE,
+  isStopBarkCommand,
   isStreamQuestion,
   makeCasualReply,
   makeStreamReply,
@@ -19,6 +21,7 @@ const defaultBarkChannelId = "1375559893133561886";
 const barkChannelId = process.env.BARK_CHANNEL_ID || defaultBarkChannelId;
 const BARK_INTERVAL_MS = 30 * 60 * 1000;
 let lastReplyChannelId = null;
+let barkInterval = null;
 
 if (!token) {
   console.error("Missing DISCORD_TOKEN. Set it in your host's environment variables.");
@@ -41,7 +44,7 @@ client.once(Events.ClientReady, (readyClient) => {
     type: ActivityType.Listening
   });
 
-  setInterval(() => {
+  barkInterval = setInterval(() => {
     sendScheduledBark(readyClient);
   }, BARK_INTERVAL_MS);
 });
@@ -72,6 +75,36 @@ async function sendScheduledBark(readyClient) {
 
 client.on(Events.MessageCreate, async (message) => {
   if (message.author.bot) {
+    return;
+  }
+
+  if (isStopBarkCommand(message.content)) {
+    const isAdmin =
+      message.inGuild() &&
+      message.member?.permissions.has(PermissionFlagsBits.Administrator);
+
+    if (!isAdmin) {
+      await message.reply({
+        content: "Only an administrator can stop the barking.",
+        allowedMentions: { repliedUser: false }
+      });
+      return;
+    }
+
+    if (barkInterval) {
+      clearInterval(barkInterval);
+      barkInterval = null;
+      await message.reply({
+        content: "Barking disabled.",
+        allowedMentions: { repliedUser: false }
+      });
+      return;
+    }
+
+    await message.reply({
+      content: "Barking is already disabled.",
+      allowedMentions: { repliedUser: false }
+    });
     return;
   }
 
