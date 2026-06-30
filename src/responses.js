@@ -4,6 +4,12 @@ export const STREAM_INFO_URL =
 export const STREAM_RESPONSE = `Capy usually streams every day for atleast an hour, usually after 8PM UTC+2 (Romanian time) but check out ${STREAM_INFO_URL} for more information.`;
 export const BARK_RESPONSE = "bark";
 
+export function isBiteCommand(content) {
+  return /^\s*mikey(?:\s*2(?:\s*0)?)?\s*,?\s+bite(?:\s+<@!?\d+>)?\s*[!.]?\s*$/i.test(
+    content
+  );
+}
+
 const GENERIC_STREAM_CONTEXT =
   /\b(a stream|my stream|your stream|their stream|some stream|something like a stream|stream in my|stream in the|stream at my|stream at the)\b/i;
 const GENERIC_STREAM_PREVIOUS_WORDS = new Set([

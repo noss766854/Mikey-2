@@ -12,6 +12,7 @@ Commands:
 - `/stopbark` stops scheduled barking. Administrator only.
 - `/startbark` restarts scheduled barking. Administrator only.
 - `/rolereply` manages random replies for members with a particular role. Administrator only.
+- `mikey, bite @user` lets a moderator time out a mentioned user for 5 seconds.
 
 ## Requirements
 
@@ -81,6 +82,10 @@ Admins can configure up to six random replies for each role:
 When a member with that role triggers Mikey through a stream question, mention, name, or `lurk`, the configured random reply replaces Mikey's normal response. If multiple configured roles match, the highest role is used.
 
 Mikey stores these settings in pinned messages in `ROLE_REPLY_CONFIG_CHANNEL_ID`, so they survive restarts and redeploys. Give Mikey **View Channel**, **Send Messages**, **Read Message History**, and **Manage Messages** in that channel.
+
+## Moderator Bite
+
+Members with the **Moderate Members** permission can send `mikey, bite @user` to time out the mentioned member for 5 seconds. Mikey also needs **Moderate Members**, and Mikey's server role must be above the target member's highest role.
 
 ## Register Commands
 

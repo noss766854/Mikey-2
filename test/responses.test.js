@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
   BARK_RESPONSE,
+  isBiteCommand,
   isStreamQuestion,
   makeCasualReply,
   makeStreamReply,
@@ -60,6 +61,13 @@ describe("stream question detection", () => {
 });
 
 describe("replies", () => {
+  it("recognizes moderator bite commands", () => {
+    assert.equal(isBiteCommand("mikey, bite <@123456>"), true);
+    assert.equal(isBiteCommand("Mikey bite <@!123456>!"), true);
+    assert.equal(isBiteCommand("mikey bite"), true);
+    assert.equal(isBiteCommand("please mikey bite <@123456>"), false);
+  });
+
   it("replies to lurk", () => {
     assert.equal(makeCasualReply("lurk", "Dragos"), "good boy");
   });

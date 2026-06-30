@@ -11,6 +11,7 @@ import {
 import { COMMAND_NAMES } from "./commands.js";
 import {
   BARK_RESPONSE,
+  isBiteCommand,
   isStreamQuestion,
   makeCasualReply,
   makeStreamReply,
@@ -99,6 +100,11 @@ client.on(Events.MessageCreate, async (message) => {
     return;
   }
 
+  if (isBiteCommand(message.content)) {
+    await handleBiteCommand(message);
+    return;
+  }
+
   const streamQuestion = isStreamQuestion(message.content);
   const casualTrigger = shouldCasuallyReply(message, client.user?.id);
 
@@ -146,6 +152,66 @@ client.on(Events.MessageCreate, async (message) => {
     });
   }
 });
+
+async function handleBiteCommand(message) {
+  const isModerator =
+    message.inGuild() &&
+    message.member?.permissions.has(PermissionFlagsBits.ModerateMembers);
+
+  if (!isModerator) {
+    await message.reply({
+      content: "Only a moderator can tell me to bite someone.",
+      allowedMentions: { repliedUser: false }
+    });
+    return;
+  }
+
+  const target = message.mentions.members?.first();
+
+  if (!target) {
+    await message.reply({
+      content: "Mention the user you want me to bite.",
+      allowedMentions: { repliedUser: false }
+    });
+    return;
+  }
+
+  if (target.id === message.author.id) {
+    await message.reply({
+      content: "You cannot tell me to bite you.",
+      allowedMentions: { repliedUser: false }
+    });
+    return;
+  }
+
+  if (!target.moderatable) {
+    await message.reply({
+      content: "I cannot bite that user. Their role may be above mine.",
+      allowedMentions: { repliedUser: false }
+    });
+    return;
+  }
+
+  try {
+    await target.timeout(
+      5_000,
+      `Mikey bite requested by ${message.author.username}`
+    );
+    await message.reply({
+      content: `Bit ${target} for 5 seconds.`,
+      allowedMentions: {
+        users: [target.id],
+        repliedUser: false
+      }
+    });
+  } catch (error) {
+    console.error("Failed to time out bite target:", error);
+    await message.reply({
+      content: "I could not bite that user. Check my Moderate Members permission and role position.",
+      allowedMentions: { repliedUser: false }
+    });
+  }
+}
 
 client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isChatInputCommand()) {
