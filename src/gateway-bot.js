@@ -4,6 +4,7 @@ import {
   Client,
   Events,
   GatewayIntentBits,
+  MessageFlags,
   Partials,
   PermissionFlagsBits
 } from "discord.js";
@@ -15,11 +16,15 @@ import {
   makeStreamReply,
   shouldCasuallyReply
 } from "./responses.js";
+import { MAX_ROLE_REPLIES, RoleReplyStore } from "./role-replies.js";
 
 const token = process.env.DISCORD_TOKEN;
 const defaultBarkChannelId = "1375559893133561886";
 const barkChannelId = process.env.BARK_CHANNEL_ID || defaultBarkChannelId;
+const roleReplyChannelId =
+  process.env.ROLE_REPLY_CONFIG_CHANNEL_ID || barkChannelId;
 const BARK_INTERVAL_MS = 30 * 60 * 1000;
+const roleReplyStore = new RoleReplyStore(roleReplyChannelId);
 let lastReplyChannelId = null;
 let barkInterval = null;
 
@@ -38,11 +43,18 @@ const client = new Client({
   partials: [Partials.Channel]
 });
 
-client.once(Events.ClientReady, (readyClient) => {
+client.once(Events.ClientReady, async (readyClient) => {
   console.log(`Mikey 2.0 is online as ${readyClient.user.tag}`);
   readyClient.user.setActivity("for stream questions", {
     type: ActivityType.Listening
   });
+
+  try {
+    const roleCount = await roleReplyStore.load(readyClient);
+    console.log(`Loaded role replies for ${roleCount} roles.`);
+  } catch (error) {
+    console.error("Failed to load role replies:", error);
+  }
 
   startScheduledBarking(readyClient);
 });
@@ -87,7 +99,28 @@ client.on(Events.MessageCreate, async (message) => {
     return;
   }
 
-  if (isStreamQuestion(message.content)) {
+  const streamQuestion = isStreamQuestion(message.content);
+  const casualTrigger = shouldCasuallyReply(message, client.user?.id);
+
+  if (!streamQuestion && !casualTrigger) {
+    return;
+  }
+
+  const roleReply = roleReplyStore.getReplyForMember(message.member);
+
+  if (roleReply) {
+    rememberReplyChannel(message);
+    await message.reply({
+      content: roleReply,
+      allowedMentions: {
+        parse: [],
+        repliedUser: false
+      }
+    });
+    return;
+  }
+
+  if (streamQuestion) {
     rememberReplyChannel(message);
     await message.channel.send({
       content: makeStreamReply(message.author.id),
@@ -98,7 +131,7 @@ client.on(Events.MessageCreate, async (message) => {
     return;
   }
 
-  if (shouldCasuallyReply(message, client.user?.id)) {
+  if (casualTrigger) {
     rememberReplyChannel(message);
     const displayName =
       message.member?.displayName ??
@@ -116,6 +149,25 @@ client.on(Events.MessageCreate, async (message) => {
 
 client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isChatInputCommand()) {
+    return;
+  }
+
+  if (interaction.commandName === COMMAND_NAMES.ROLE_REPLY) {
+    await handleRoleReplyCommand(interaction);
+    return;
+  }
+
+  const roleReply = roleReplyStore.getReplyForMember(interaction.member);
+
+  if (
+    roleReply &&
+    (interaction.commandName === COMMAND_NAMES.STREAM ||
+      interaction.commandName === COMMAND_NAMES.MIKEY)
+  ) {
+    await interaction.reply({
+      content: roleReply,
+      allowedMentions: { parse: [] }
+    });
     return;
   }
 
@@ -183,6 +235,100 @@ client.on(Events.InteractionCreate, async (interaction) => {
     started ? "Started barking." : "Barking is already enabled."
   );
 });
+
+async function handleRoleReplyCommand(interaction) {
+  const isAdmin =
+    interaction.inGuild() &&
+    interaction.memberPermissions?.has(PermissionFlagsBits.Administrator);
+
+  if (!isAdmin) {
+    await interaction.reply({
+      content: "Only an administrator can configure role replies.",
+      flags: MessageFlags.Ephemeral
+    });
+    return;
+  }
+
+  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
+  try {
+    const subcommand = interaction.options.getSubcommand();
+    const role = interaction.options.getRole("role", true);
+
+    if (!roleReplyStore.channel) {
+      await interaction.editReply("Role-reply storage is not available.");
+      return;
+    }
+
+    if (interaction.guildId !== roleReplyStore.channel.guildId) {
+      await interaction.editReply(
+        "That role is not from the server containing Mikey's role-reply storage channel."
+      );
+      return;
+    }
+
+    if (subcommand === "add") {
+      const reply = interaction.options.getString("reply", true);
+      const result = await roleReplyStore.addReply(role.id, reply);
+      const messages = {
+        added: `Added reply ${result.count}/${MAX_ROLE_REPLIES} for ${role}.`,
+        duplicate: `That reply is already configured for ${role}.`,
+        empty: "The reply cannot be empty.",
+        too_long: "The reply cannot be longer than 200 characters.",
+        full: `${role} already has the maximum of ${MAX_ROLE_REPLIES} replies.`
+      };
+
+      await interaction.editReply({
+        content: messages[result.status],
+        allowedMentions: { parse: [] }
+      });
+      return;
+    }
+
+    if (subcommand === "remove") {
+      const number = interaction.options.getInteger("number", true);
+      const result = await roleReplyStore.removeReply(role.id, number);
+      const content =
+        result.status === "removed"
+          ? `Removed reply ${number} from ${role}. ${result.count} remaining.`
+          : `Reply ${number} does not exist for ${role}. Use /rolereply list first.`;
+
+      await interaction.editReply({
+        content,
+        allowedMentions: { parse: [] }
+      });
+      return;
+    }
+
+    if (subcommand === "list") {
+      const replies = roleReplyStore.getReplies(role.id);
+      const content = replies.length
+        ? [`Replies for ${role}:`, ...replies.map((reply, index) => `${index + 1}. ${reply}`)].join("\n")
+        : `No replies are configured for ${role}.`;
+
+      await interaction.editReply({
+        content,
+        allowedMentions: { parse: [] }
+      });
+      return;
+    }
+
+    const cleared = await roleReplyStore.clearRole(role.id);
+    await interaction.editReply({
+      content: cleared
+        ? `Cleared all role replies for ${role}.`
+        : `No replies are configured for ${role}.`,
+      allowedMentions: { parse: [] }
+    });
+  } catch (error) {
+    console.error("Failed to configure role replies:", error);
+    await interaction.editReply(
+      error instanceof Error
+        ? error.message
+        : "Could not update the role replies."
+    );
+  }
+}
 
 client.on(Events.Error, (error) => {
   console.error("Discord client error:", error);

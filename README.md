@@ -11,6 +11,7 @@ Commands:
 - `/mikey message:...` lets people talk to Mikey. If the message is a variation of "when is the stream?", Mikey sends the stream reply.
 - `/stopbark` stops scheduled barking. Administrator only.
 - `/startbark` restarts scheduled barking. Administrator only.
+- `/rolereply` manages random replies for members with a particular role. Administrator only.
 
 ## Requirements
 
@@ -50,6 +51,7 @@ Required environment variable:
 ```env
 DISCORD_TOKEN=your-real-bot-token
 BARK_CHANNEL_ID=1375559893133561886
+ROLE_REPLY_CONFIG_CHANNEL_ID=1375559893133561886
 ```
 
 Start locally:
@@ -63,6 +65,22 @@ Docker hosts can build the included `Dockerfile`. The container starts `npm star
 Mikey says `bark` every 30 minutes in the configured channel. The default `BARK_CHANNEL_ID` is `1375559893133561886`.
 
 For slash commands to reach the Gateway bot, leave the Discord application's **Interactions Endpoint URL** blank. Discord sends interactions to the Gateway when no outgoing interaction webhook is configured.
+
+## Role Replies
+
+Admins can configure up to six random replies for each role:
+
+```text
+/rolereply add role:@Role reply:First reply
+/rolereply add role:@Role reply:Second reply
+/rolereply list role:@Role
+/rolereply remove role:@Role number:1
+/rolereply clear role:@Role
+```
+
+When a member with that role triggers Mikey through a stream question, mention, name, or `lurk`, the configured random reply replaces Mikey's normal response. If multiple configured roles match, the highest role is used.
+
+Mikey stores these settings in pinned messages in `ROLE_REPLY_CONFIG_CHANNEL_ID`, so they survive restarts and redeploys. Give Mikey **View Channel**, **Send Messages**, **Read Message History**, and **Manage Messages** in that channel.
 
 ## Register Commands
 

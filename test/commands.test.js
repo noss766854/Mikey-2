@@ -12,4 +12,18 @@ describe("slash commands", () => {
       assert.equal(command.dm_permission, false);
     }
   });
+
+  it("registers admin-only role-reply management subcommands", () => {
+    const command = MIKEY_COMMANDS.find(
+      (item) => item.name === COMMAND_NAMES.ROLE_REPLY
+    );
+
+    assert.ok(command);
+    assert.equal(command.default_member_permissions, "8");
+    assert.equal(command.dm_permission, false);
+    assert.deepEqual(
+      command.options.map((option) => option.name),
+      ["add", "remove", "list", "clear"]
+    );
+  });
 });

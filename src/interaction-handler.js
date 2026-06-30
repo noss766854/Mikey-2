@@ -104,10 +104,11 @@ export function handleInteraction(interaction) {
 
   if (
     interaction.data?.name === COMMAND_NAMES.STOP_BARK ||
-    interaction.data?.name === COMMAND_NAMES.START_BARK
+    interaction.data?.name === COMMAND_NAMES.START_BARK ||
+    interaction.data?.name === COMMAND_NAMES.ROLE_REPLY
   ) {
     return commandReply(
-      "Bark controls must be handled by Mikey's always-running Gateway bot.",
+      "Stateful admin commands must be handled by Mikey's always-running Gateway bot.",
       { ephemeral: true }
     );
   }
